@@ -3,23 +3,17 @@ import pickle
 import numpy as np
 
 app = Flask(__name__)
-
 model = pickle.load(open("placement_lr.pkl", "rb"))
 
-@app.route("/", methods=["GET","POST"])
+@app.route("/", methods=["GET", "POST"])
 def home():
+    result = None
     if request.method == "POST":
         cgpa = float(request.form["cgpa"])
         iq = float(request.form["iq"])
-        result = model.predict([[cgpa, iq]])
-        return f"Placement: {int(result[0])}"
-    return '''
-    <form method="post">
-        CGPA: <input name="cgpa"><br>
-        IQ: <input name="iq"><br>
-        <button type="submit">Predict</button>
-    </form>
-    '''
+        pred = model.predict([[cgpa, iq]])[0]
+        result = "Placed" if pred == 1 else "Not Placed"
+    return render_template("index.html", result=result)
 
 if __name__ == "__main__":
     app.run()
